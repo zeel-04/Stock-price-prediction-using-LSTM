@@ -48,9 +48,7 @@ def forecast(df):
     model.add(Dense(1))
     model.compile(loss='mean_squared_error',optimizer='adam')
 
-    # st.info(model.summary)
-
-    model.fit(X_train,y_train,validation_data=(X_test,ytest),epochs=10,batch_size=64,verbose=1)
+    model.fit(X_train,y_train,validation_data=(X_test,ytest),epochs=1,batch_size=64,verbose=1)
 
     ### Lets Do the prediction and check performance metrics
     train_predict=model.predict(X_train)
@@ -60,8 +58,14 @@ def forecast(df):
     train_predict=scaler.inverse_transform(train_predict)
     test_predict=scaler.inverse_transform(test_predict)
 
-    st.info(math.sqrt(mean_squared_error(y_train,train_predict)))
-    st.info(math.sqrt(mean_squared_error(ytest,test_predict)))
+    st.subheader("Mean Squared :red[Error].")
+    st.markdown("#")
+    col1, col2 = st.columns(2)
+    col1.metric("Train Prediction",f"{round(math.sqrt(mean_squared_error(y_train,train_predict)))}","- Error")
+    col2.metric("Test Prediction",f"{round(math.sqrt(mean_squared_error(ytest,test_predict)))}","- Error")
+    st.markdown("#")
+    # st.info(math.sqrt(mean_squared_error(y_train,train_predict)))
+    # st.info(math.sqrt(mean_squared_error(ytest,test_predict)))
 
     # shift train predictions for plotting
     look_back=100
@@ -79,16 +83,26 @@ def forecast(df):
     # plt.plot(testPredictPlot)
     # plt.show()
 
-    fig = go.Figure()
-    trace1 = px.line(scaler.inverse_transform(df_1))
-    trace2 = px.line(trainPredictPlot)
-    trace2.update_traces(line_color='orange')
-    trace3 = px.line(testPredictPlot)
-    trace3.update_traces(line_color='green')
-    fig.add_trace(trace1.data[0])
-    fig.add_trace(trace2.data[0])
-    fig.add_trace(trace3.data[0])
-    st.plotly_chart(fig,use_container_width=True,theme="streamlit")
+    # fig = go.Figure()
+    # trace1 = px.line(scaler.inverse_transform(df_1))
+    # trace2 = px.line(trainPredictPlot)
+    # trace2.update_traces(line_color='orange')
+    # trace3 = px.line(testPredictPlot)
+    # trace3.update_traces(line_color='green')
+    # fig.add_trace(trace1.data[0])
+    # fig.add_trace(trace2.data[0])
+    # fig.add_trace(trace3.data[0])
+    # fig.update_layout(showlegend=False)
+    # st.plotly_chart(fig,use_container_width=True,theme="streamlit")
+
+    st.subheader("Visualizing :blue[Train] and :blue[Test] Prediction.")
+    df['Close Price'] = scaler.inverse_transform(df_1)
+    df['Train Predict Plot'] = trainPredictPlot
+    df['Test Predict Plot'] = testPredictPlot
+    figt = px.line(df,x=df['Date'],y=df['Close Price'])
+    figt.add_scatter(x=df['Date'],y=df['Train Predict Plot'],name="Train prediction")
+    figt.add_scatter(x=df['Date'],y=df['Test Predict Plot'],name="Test prediction",marker=dict(color='orange'))
+    st.plotly_chart(figt,use_container_width=True,theme="streamlit")
 
     x_input = df_1[len(df_1)-100:].reshape(1,-1)
     temp_input=list(x_input)
@@ -103,12 +117,12 @@ def forecast(df):
         if(len(temp_input)>100):
             #print(temp_input)
             x_input=np.array(temp_input[1:])
-            print("{} day input {}".format(i,x_input))
+            # print("{} day input {}".format(i,x_input))
             x_input=x_input.reshape(1,-1)
             x_input = x_input.reshape((1, n_steps, 1))
             #print(x_input)
             yhat = model.predict(x_input, verbose=0)
-            print("{} day output {}".format(i,yhat))
+            # print("{} day output {}".format(i,yhat))
             temp_input.extend(yhat[0].tolist())
             temp_input=temp_input[1:]
             #print(temp_input)
@@ -123,6 +137,8 @@ def forecast(df):
             lst_output.extend(yhat.tolist())
             i=i+1
 
+    #forecast plotting
+    st.subheader("Forecasting share prices over the next :blue[30 days] using data from the preceding :blue[100 days].")
     day_new=np.arange(1,101)
     day_pred=np.arange(101,131)
 
