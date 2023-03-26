@@ -11,6 +11,8 @@ from keras.layers import LSTM
 import plotly.graph_objects as go
 import plotly.express as px
 import matplotlib.pyplot as plt 
+from datetime import datetime, timedelta
+from collections import deque
 
 def forecast(df):
 
@@ -96,9 +98,11 @@ def forecast(df):
     # st.plotly_chart(fig,use_container_width=True,theme="streamlit")
 
     st.subheader("Visualizing :blue[Train] and :blue[Test] Prediction.")
+
     df['Close Price'] = scaler.inverse_transform(df_1)
     df['Train Predict Plot'] = trainPredictPlot
     df['Test Predict Plot'] = testPredictPlot
+
     figt = px.line(df,x=df['Date'],y=df['Close Price'])
     figt.add_scatter(x=df['Date'],y=df['Train Predict Plot'],name="Train prediction")
     figt.add_scatter(x=df['Date'],y=df['Test Predict Plot'],name="Test prediction",marker=dict(color='orange'))
@@ -137,10 +141,41 @@ def forecast(df):
             lst_output.extend(yhat.tolist())
             i=i+1
 
-    #forecast plotting
-    st.subheader("Forecasting share prices over the next :blue[30 days] using data from the preceding :blue[100 days].")
-    day_new=np.arange(1,101)
-    day_pred=np.arange(101,131)
+    #forecast plotting with matplotlib
+    # day_new=np.arange(1,101)
+    # day_pred=np.arange(101,131)
+
+    # fig = plt.figure()
+    # plt.plot(day_new,scaler.inverse_transform(df_1[len(df_1)-100:]))
+    # plt.plot(day_pred,scaler.inverse_transform(lst_output))
+    # st.pyplot(fig)
+
+    st.subheader("Forecasting share prices over the next :orange[30 days] using data from the preceding :blue[100 days].")
+    #new forecast plotting with plotly
+    data = []
+    for value in scaler.inverse_transform(df_1[len(df_1)-100:]):
+        data.append(value[0])
+    
+    for value in scaler.inverse_transform(lst_output):
+        data.append(value[0])
+
+    end_date = datetime.strptime(max(df['Date']),"%Y-%m-%d")
+    dates = []
+    for i in range(100):
+        dates = deque(dates)
+        dates.appendleft(end_date.date() - timedelta(days=i))
+        dates = list(dates)
+
+    for i in range(30):
+        dates.append(end_date.date() + timedelta(days=(i+1)))
+
+    forecast_df = pd.DataFrame(data, columns=['Value'])
+    forecast_df['Date'] = dates
+
+    forecast_plot_fig = px.line(forecast_df, x=forecast_df['Date'][:100],y=forecast_df['Value'][:100])
+    forecast_plot_fig.add_scatter(x=forecast_df['Date'][100:],y=forecast_df['Value'][100:],name = 'Forecasted Share Price',marker=dict(color="orange"))
+    forecast_plot_fig.update_layout(xaxis_title="Date",yaxis_title="Price")
+    st.plotly_chart(forecast_plot_fig,use_container_width=True,theme="streamlit")
 
     # fig2 = go.Figure()
     # trace1 = px.line(y=scaler.inverse_transform(df_1[len(df_1)-100:]),x=day_new)
@@ -149,8 +184,3 @@ def forecast(df):
     # fig2.add_trace(trace1.data[0])
     # fig2.add_trace(trace2.data[0])
     # st.plotly_chart(fig2,use_container_width=True,theme="streamlit")
-
-    fig = plt.figure()
-    plt.plot(day_new,scaler.inverse_transform(df_1[len(df_1)-100:]))
-    plt.plot(day_pred,scaler.inverse_transform(lst_output))
-    st.pyplot(fig)

@@ -85,6 +85,7 @@ if len(stock_name) != 0:
             fig2 = go.Figure()
             trace1 = px.line(x=stock_data["Date"],y=stock_data['Open'])
             fig2.add_trace(trace1.data[0])
+            fig2.update_layout(xaxis_title="Date", yaxis_title="Value")
             st.plotly_chart(fig2,use_container_width=True,theme="streamlit")
     with b2:
         with st.spinner("Loading..."):
@@ -92,6 +93,7 @@ if len(stock_name) != 0:
             fig2 = go.Figure()
             trace1 = px.line(x=stock_data["Date"],y=stock_data['Close'])
             fig2.add_trace(trace1.data[0])
+            fig2.update_layout(xaxis_title="Date", yaxis_title="Value")
             st.plotly_chart(fig2,use_container_width=True,theme="streamlit")
 
     c1,c2 = st.columns(2)
@@ -101,6 +103,7 @@ if len(stock_name) != 0:
             fig2 = go.Figure()
             trace1 = px.line(x=stock_data["Date"],y=stock_data['High'])
             fig2.add_trace(trace1.data[0])
+            fig2.update_layout(xaxis_title="Date", yaxis_title="Value")
             st.plotly_chart(fig2,use_container_width=True,theme="streamlit")
     with c2:
         with st.spinner("Loading..."):
@@ -108,6 +111,7 @@ if len(stock_name) != 0:
             fig2 = go.Figure()
             trace1 = px.line(x=stock_data["Date"],y=stock_data['Low'])
             fig2.add_trace(trace1.data[0])
+            fig2.update_layout(xaxis_title="Date", yaxis_title="Value")
             st.plotly_chart(fig2,use_container_width=True,theme="streamlit")
 
     with st.spinner("Loading..."):
@@ -115,6 +119,7 @@ if len(stock_name) != 0:
         fig3 = go.Figure()
         trace2 = px.bar(x=stock_data['Date'],y=stock_data['Volume'])
         fig3.add_trace(trace2.data[0])
+        fig3.update_layout(xaxis_title="Date", yaxis_title="Volume")
         st.plotly_chart(fig3,use_container_width=True,theme="streamlit")
 
 
