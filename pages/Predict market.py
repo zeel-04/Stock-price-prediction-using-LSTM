@@ -31,16 +31,16 @@ if len(stock_name) != 0:
         #downloaad stock data as per above mentioned dates
         stock_data = yf.download(stock_name, start=start_date, end=end_date)
     
-    os.makedirs('Data', exist_ok=True)  
-    stock_data.to_csv(f'Data/{stock_name}.csv')
-    
-    df = pd.read_csv(f'Data/{stock_name}.csv')
+        os.makedirs('Data', exist_ok=True)  
+        stock_data.to_csv(f'Data/{stock_name}.csv')
+        
+        df = pd.read_csv(f'Data/{stock_name}.csv')
 
-    st.subheader(f"**:blue[{stock_name}]** Stock Data.")
-    st.dataframe(df,use_container_width=True)
+        st.subheader(f"**:blue[{stock_name}]** Stock Data.")
+        st.dataframe(df,use_container_width=True)
 
-    with st.spinner("AI is at work..."):
-        LSTM_model.forecast(df)
+        with st.spinner("AI is at work..."):
+            LSTM_model.forecast(df)
 
 
     
